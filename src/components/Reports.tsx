@@ -98,7 +98,6 @@ const Reports: React.FC<ReportsProps> = memo(({ alerts, machines }) => {
                 className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               >
                 <option value="machine-status">Machine Status Report</option>
-                <option value="alerts">Alert History Report</option>
               </select>
             </div>
             

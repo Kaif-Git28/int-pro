@@ -84,11 +84,6 @@ const AdvancedDashboard: React.FC = () => {
             <div className="relative">
               <button className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
                 <Bell size={20} />
-                {dashboardData.alerts.length > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-xs flex items-center justify-center text-white">
-                    {dashboardData.alerts.length}
-                  </span>
-                )}
               </button>
             </div>
             <div className="flex items-center space-x-2">
@@ -245,27 +240,21 @@ const AdvancedDashboard: React.FC = () => {
                 <div className="mt-4 space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">API URL</label>
-                    <div className="mt-1 flex">
+                    <div className="mt-1 flex rounded-md shadow-sm">
                       <input
                         type="text"
                         value={apiUrlInput}
                         onChange={(e) => setApiUrlInput(e.target.value)}
-                        className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 
-                          px-3 py-2 text-gray-900 dark:text-white focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                        placeholder="/api/api/param_details"
+                        className="flex-1 rounded-l-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-gray-900 dark:text-white focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        placeholder="http://localhost:5000/api/api/param_details"
                       />
                       <button
                         onClick={handleApiUrlUpdate}
-                        className="ml-2 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
+                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-r-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                       >
-                        Connect
+                        Update
                       </button>
                     </div>
-                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                      {apiStatus.loading ? 'Connecting...' : 
-                       apiStatus.error ? `Error: ${apiStatus.error}` : 
-                       'Connected successfully'}
-                    </p>
                   </div>
 
                   <div className="mt-2">
@@ -310,49 +299,6 @@ const AdvancedDashboard: React.FC = () => {
               </div>
             </div>
           )}
-
-          {/* Alerts Section */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-              Recent Alerts
-            </h2>
-            <div className="space-y-4">
-              {dashboardData.alerts.length > 0 ? (
-                dashboardData.alerts.map((alert) => (
-                  <div
-                    key={alert.id}
-                    className={`p-4 rounded-lg ${
-                      alert.severity === 'critical'
-                        ? 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
-                        : 'bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800'
-                    }`}
-                  >
-                    <div className="flex items-start">
-                      <AlertTriangle
-                        className={`w-5 h-5 mt-1 ${
-                          alert.severity === 'critical'
-                            ? 'text-red-500 dark:text-red-400'
-                            : 'text-yellow-500 dark:text-yellow-400'
-                        }`}
-                      />
-                      <div className="ml-3">
-                        <p className="text-sm font-medium text-gray-900 dark:text-white">
-                          {alert.type}
-                        </p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          Machine: {alert.machine} | Time: {alert.time}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="text-gray-500 dark:text-gray-400 text-center py-4">
-                  No alerts to display
-                </p>
-              )}
-            </div>
-          </div>
         </main>
       </div>
     </div>

@@ -55,16 +55,12 @@ const MachineStatus: React.FC<MachineStatusProps> = memo(({ onSelectMachine }) =
               <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Health
               </th>
-              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                Last Maintenance
-              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
             {machineList.map((machineId) => {
               const status = getMachineStatus(machineId);
               const health = getMachineHealth(machineId);
-              const lastMaintenance = getLastMaintenance(machineId);
               
               return (
                 <tr 
@@ -114,9 +110,6 @@ const MachineStatus: React.FC<MachineStatusProps> = memo(({ onSelectMachine }) =
                       </div>
                       <span className="text-sm text-gray-900 dark:text-white">{health}%</span>
                     </div>
-                  </td>
-                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                    {lastMaintenance}
                   </td>
                 </tr>
               );

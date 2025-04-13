@@ -2,12 +2,20 @@ import { Machine, SystemHealth, ProductivityData, EnergyConsumptionData, Machine
 
 // Generate mock machine data
 export const generateData = (machineId: string): MachineData => {
+  // Base time to failure between 24-168 hours (1-7 days)
+  const baseTimeToFailure = 24 + Math.floor(Math.random() * 144);
+  
+  // Adjust based on machine ID to give some consistency
+  const machineHash = machineId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const adjustedTimeToFailure = Math.max(1, baseTimeToFailure + (machineHash % 48 - 24));
+  
   return {
     machineId,
     time: new Date().toISOString(),
     speed: Math.floor(Math.random() * 1500),
     temperature: 20 + Math.floor(Math.random() * 30),
     load: Math.floor(Math.random() * 100),
+    timeToFailure: adjustedTimeToFailure,
   };
 };
 
@@ -15,15 +23,27 @@ export const generateData = (machineId: string): MachineData => {
 export const generateHistoricalData = (count: number, machineId: string): MachineData[] => {
   const result: MachineData[] = [];
   const now = new Date();
+  
+  // Base time to failure between 24-168 hours (1-7 days)
+  const baseTimeToFailure = 24 + Math.floor(Math.random() * 144);
+  
+  // Adjust based on machine ID to give some consistency
+  const machineHash = machineId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const initialTimeToFailure = Math.max(1, baseTimeToFailure + (machineHash % 48 - 24));
 
   for (let i = 0; i < count; i++) {
     const time = new Date(now.getTime() - (i * 5 * 60 * 1000)); // 5 minute intervals
+    
+    // Decrease time to failure as we go back in time (5 min = 1/12 of an hour)
+    const timeToFailure = initialTimeToFailure + (i / 12);
+    
     result.unshift({
       machineId,
       time: time.toISOString(),
       speed: Math.floor(Math.random() * 1500),
       temperature: 20 + Math.floor(Math.random() * 30),
       load: Math.floor(Math.random() * 100),
+      timeToFailure: timeToFailure,
     });
   }
 

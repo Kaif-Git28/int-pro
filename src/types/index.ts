@@ -5,6 +5,7 @@ export interface MachineData {
   speed: number;
   temperature: number;
   load: number;
+  timeToFailure: number; // Time in hours until predicted failure
 }
 
 // API response type

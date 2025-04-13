@@ -23,9 +23,6 @@ const Sidebar: React.FC<SidebarProps> = memo(({ activeTab, setActiveTab, alerts 
           {tab === 'reports' && <Download size={16} />}
           {tab === 'settings' && <Settings size={16} />}
           <span>{tab.charAt(0).toUpperCase() + tab.slice(1)}</span>
-          {tab === 'alerts' && alerts.length > 0 && (
-            <span className="ml-auto bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">{alerts.length}</span>
-          )}
         </button>
       ))}
     </nav>

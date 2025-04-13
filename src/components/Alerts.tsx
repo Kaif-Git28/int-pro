@@ -7,9 +7,6 @@ const Alerts: React.FC<AlertsProps> = memo(({ alerts }) => {
     <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Active Alerts</h2>
-        <span className="bg-red-500 bg-opacity-20 text-red-500 text-xs px-2 py-1 rounded-full">
-          {alerts.length} {alerts.length === 1 ? 'Alert' : 'Alerts'}
-        </span>
       </div>
       {alerts.length > 0 ? (
         <div className="overflow-y-auto max-h-80">

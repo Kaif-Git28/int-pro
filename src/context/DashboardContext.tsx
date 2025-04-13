@@ -55,13 +55,28 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   // Convert API data to our format
   const convertApiDataToMachineData = useCallback((apiData: ApiSpindleData): MachineData[] => {
     const now = new Date();
-    return Object.entries(apiData).map(([machineId, data]) => ({
-      machineId,
-      time: now.toISOString(),
-      speed: data.spindle_speed_0 ? parseFloat(data.spindle_speed_0) : 0,
-      temperature: data.spindle_temp_0 ? parseFloat(data.spindle_temp_0) : 0,
-      load: data.spindle_load_0 ? parseFloat(data.spindle_load_0) : 0,
-    }));
+    return Object.entries(apiData).map(([machineId, data]) => {
+      // Get the current values
+      const speed = data.spindle_speed_0 ? parseFloat(data.spindle_speed_0) : 0;
+      const temp = data.spindle_temp_0 ? parseFloat(data.spindle_temp_0) : 0;
+      const load = data.spindle_load_0 ? parseFloat(data.spindle_load_0) : 0;
+      
+      // Calculate time to failure only if load exceeds 140
+      let timeToFailure = 0;
+      if (load > 140) {
+        // Generate random value between 130-195 days
+        timeToFailure = 130 + Math.random() * 65; // 130 + (0-65) = 130-195
+      }
+      
+      return {
+        machineId,
+        time: now.toISOString(),
+        speed: speed,
+        temperature: temp,
+        load: load,
+        timeToFailure: timeToFailure,
+      };
+    });
   }, []);
 
   // Generate alerts based on thresholds
@@ -70,33 +85,21 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const now = new Date();
     
     data.forEach(machine => {
-      if (machine.temperature > 30) {
+      if (machine.load > 140) {
         alerts.push({
           id: Date.now() + alerts.length,
-          type: 'High Temperature',
-          time: now.toLocaleTimeString(),
-          machine: machine.machineId,
-          severity: 'warning'
-        });
-      }
-      
-      if (machine.speed > 1000) {
-        alerts.push({
-          id: Date.now() + alerts.length,
-          type: 'High Speed',
-          time: now.toLocaleTimeString(),
-          machine: machine.machineId,
-          severity: 'warning'
-        });
-      }
-      
-      if (machine.load > 80) {
-        alerts.push({
-          id: Date.now() + alerts.length,
-          type: 'High Load',
+          type: 'Critical Load Alert',
           time: now.toLocaleTimeString(),
           machine: machine.machineId,
           severity: 'critical'
+        });
+      } else if (machine.load > 100) {
+        alerts.push({
+          id: Date.now() + alerts.length,
+          type: 'High Load Warning',
+          time: now.toLocaleTimeString(),
+          machine: machine.machineId,
+          severity: 'warning'
         });
       }
     });
