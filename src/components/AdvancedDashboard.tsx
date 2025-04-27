@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, Menu, Clock, Calendar, RefreshCw, ChevronDown, ChevronRight, Users, AlertTriangle } from 'lucide-react';
+import { Menu, Clock, Calendar, RefreshCw, ChevronDown, ChevronRight, Users, AlertTriangle } from 'lucide-react';
 import { useDashboard } from '../context/DashboardContext';
 import { useTheme } from '../context/ThemeContext';
 
@@ -7,7 +7,6 @@ import { useTheme } from '../context/ThemeContext';
 import Sidebar from './Sidebar';
 import SpindleParameters from './SpindleParameters';
 import MachineStatus from './MachineStatus';
-import Alerts from './Alerts';
 import Reports from './Reports';
 
 // Import icons
@@ -81,11 +80,6 @@ const AdvancedDashboard: React.FC = () => {
               <Calendar size={14} className="text-blue-400 mr-1" />
               <span className="text-xs text-gray-900 dark:text-white">{currentTime.toLocaleDateString()}</span>
             </div>
-            <div className="relative">
-              <button className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
-                <Bell size={20} />
-              </button>
-            </div>
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
                 <Users size={16} className="text-white" />
@@ -106,7 +100,7 @@ const AdvancedDashboard: React.FC = () => {
             showMobileMenu ? 'block' : 'hidden'
           } md:block w-full md:w-60 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 absolute md:relative z-10 md:z-0`}
         >
-          <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} alerts={dashboardData.alerts} />
+          <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
         </aside>
 
         {/* Main Content */}
@@ -185,6 +179,7 @@ const AdvancedDashboard: React.FC = () => {
             <div><strong>Selected Machine:</strong> {selectedMachine || 'None'}</div>
             <div><strong>Machine Count:</strong> {machineList.length}</div>
             <div><strong>Historical Data Points:</strong> {dashboardData.historicalData.length}</div>
+            <div><strong>Failure Prediction Range:</strong> 100-200 days (triggered at load &gt; 168%)</div>
           </div>
 
           {activeTab === 'dashboard' && (
@@ -206,9 +201,6 @@ const AdvancedDashboard: React.FC = () => {
               <div className="grid grid-cols-1 lg:grid-cols-1 gap-6 mb-6">
                 <MachineStatus />
               </div>
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                <Alerts alerts={dashboardData.alerts} />
-              </div>
             </>
           )}
 
@@ -226,9 +218,7 @@ const AdvancedDashboard: React.FC = () => {
             </div>
           )}
 
-          {activeTab === 'alerts' && <Alerts alerts={dashboardData.alerts} />}
-
-          {activeTab === 'reports' && <Reports alerts={dashboardData.alerts} machines={machineList} />}
+          {activeTab === 'reports' && <Reports machines={machineList} />}
 
           {activeTab === 'settings' && (
             <div className="bg-white dark:bg-gray-800 rounded-lg p-4">
@@ -250,48 +240,32 @@ const AdvancedDashboard: React.FC = () => {
                       />
                       <button
                         onClick={handleApiUrlUpdate}
-                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-r-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                        className="inline-flex items-center px-4 py-2 rounded-r-md border border-l-0 border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-600 text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-500"
                       >
                         Update
                       </button>
                     </div>
                   </div>
-
-                  <div className="mt-2">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">API Status</label>
-                    <div className="mt-1">
-                      <span className={`px-2 py-1 text-xs rounded-full ${
-                        apiStatus.error
-                          ? 'bg-red-500 bg-opacity-20 text-red-500'
-                          : apiStatus.loading
-                          ? 'bg-yellow-500 bg-opacity-20 text-yellow-500'
-                          : 'bg-emerald-500 bg-opacity-20 text-emerald-500'
-                      }`}>
-                        {apiStatus.error ? 'Error' : apiStatus.loading ? 'Connecting' : 'Connected'}
-                      </span>
-                    </div>
-                  </div>
                 </div>
               </div>
-
-              {/* Appearance Settings */}
+              
+              {/* Theme Toggle */}
               <div className="mt-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Appearance</h3>
-                <div className="mt-4 flex items-center justify-between">
-                  <span className="text-sm text-gray-700 dark:text-gray-300">Theme</span>
+                <div className="mt-4">
                   <button
                     onClick={toggleTheme}
-                    className="flex items-center space-x-2 bg-gray-200 dark:bg-gray-700 px-3 py-1 rounded-md text-gray-900 dark:text-white"
+                    className="flex items-center space-x-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-md text-gray-900 dark:text-white"
                   >
                     {theme === 'dark' ? (
                       <>
-                        <Moon size={16} />
-                        <span>Dark Mode</span>
+                        <Sun size={16} />
+                        <span>Switch to Light Theme</span>
                       </>
                     ) : (
                       <>
-                        <Sun size={16} />
-                        <span>Light Mode</span>
+                        <Moon size={16} />
+                        <span>Switch to Dark Theme</span>
                       </>
                     )}
                   </button>

@@ -1,7 +1,7 @@
 import React, { memo, useState } from 'react';
 import { Download, FileText, Calendar } from 'lucide-react';
 import * as XLSX from 'xlsx';
-import { ReportsProps, Alert } from '../types';
+import { ReportsProps } from '../types';
 
 interface MachineReport {
   'Machine ID': string;
@@ -11,18 +11,9 @@ interface MachineReport {
   'Date Generated': string;
 }
 
-interface AlertReport {
-  'Alert ID': number;
-  'Type': string;
-  'Machine': string;
-  'Severity': string;
-  'Time': string;
-  'Date Generated': string;
-}
+type ReportData = MachineReport;
 
-type ReportData = MachineReport | AlertReport;
-
-const Reports: React.FC<ReportsProps> = memo(({ alerts, machines }) => {
+const Reports: React.FC<ReportsProps> = memo(({ machines }) => {
   const [selectedReport, setSelectedReport] = useState<string>('machine-status');
   const [dateRange, setDateRange] = useState<string>('today');
 
@@ -52,30 +43,19 @@ const Reports: React.FC<ReportsProps> = memo(({ alerts, machines }) => {
     let data: ReportData[] = [];
     const currentDate = new Date().toLocaleDateString();
 
-    if (selectedReport === 'machine-status') {
-      data = machines.map((machineId: string) => ({
-        'Machine ID': machineId,
-        'Status': getMachineStatus(machineId),
-        'Health (%)': getMachineHealth(machineId),
-        'Last Maintenance': getLastMaintenance(machineId),
-        'Date Generated': currentDate,
-      }));
-    } else if (selectedReport === 'alerts') {
-      data = alerts.map((alert: Alert) => ({
-        'Alert ID': alert.id,
-        'Type': alert.type,
-        'Machine': alert.machine,
-        'Severity': alert.severity,
-        'Time': alert.time,
-        'Date Generated': currentDate,
-      }));
-    }
+    data = machines.map((machineId: string) => ({
+      'Machine ID': machineId,
+      'Status': getMachineStatus(machineId),
+      'Health (%)': getMachineHealth(machineId),
+      'Last Maintenance': getLastMaintenance(machineId),
+      'Date Generated': currentDate,
+    }));
 
     const worksheet = XLSX.utils.json_to_sheet(data);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, selectedReport);
     
-    const reportTitle = selectedReport === 'machine-status' ? 'Machine_Status' : 'Alert_History';
+    const reportTitle = 'Machine_Status';
     const fileName = `${reportTitle}_${new Date().toISOString().split('T')[0]}.xlsx`;
     
     XLSX.writeFile(workbook, fileName);
@@ -142,22 +122,6 @@ const Reports: React.FC<ReportsProps> = memo(({ alerts, machines }) => {
               <div className="flex items-center space-x-1 text-xs text-gray-500 dark:text-gray-400">
                 <Calendar size={12} />
                 <span>Next: Tomorrow</span>
-              </div>
-            </div>
-            
-            <div className="flex items-center justify-between p-3">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 bg-yellow-100 dark:bg-yellow-900 rounded-md">
-                  <FileText size={16} className="text-yellow-600 dark:text-yellow-400" />
-                </div>
-                <div>
-                  <div className="text-sm font-medium text-gray-900 dark:text-white">Weekly Alert Summary</div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">Every Monday at 09:00</div>
-                </div>
-              </div>
-              <div className="flex items-center space-x-1 text-xs text-gray-500 dark:text-gray-400">
-                <Calendar size={12} />
-                <span>Next: Monday</span>
               </div>
             </div>
             

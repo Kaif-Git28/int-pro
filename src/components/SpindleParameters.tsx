@@ -84,7 +84,7 @@ const SpindleParameters: React.FC<SpindleParametersProps> = memo(({ data, machin
             <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
               <div
                 className={`h-2 rounded-full ${
-                  latestData.load > 140
+                  latestData.load > 168
                     ? 'bg-red-500'
                     : latestData.load > 100
                     ? 'bg-yellow-500'
@@ -105,7 +105,7 @@ const SpindleParameters: React.FC<SpindleParametersProps> = memo(({ data, machin
             <>
               <div className="flex items-baseline">
                 <span className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {latestData.timeToFailure.toFixed(1)}
+                  {Math.round(latestData.timeToFailure)}
                 </span>
                 <span className="ml-1 text-sm text-gray-500 dark:text-gray-400">days</span>
               </div>
@@ -113,17 +113,17 @@ const SpindleParameters: React.FC<SpindleParametersProps> = memo(({ data, machin
                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                   <div
                     className={`h-2 rounded-full ${
-                      latestData.timeToFailure < 150
+                      latestData.timeToFailure < 130
                         ? 'bg-red-500'
                         : latestData.timeToFailure < 170
                         ? 'bg-yellow-500'
                         : 'bg-green-500'
                     }`}
-                    style={{ width: `${Math.min((latestData.timeToFailure / 195) * 100, 100)}%` }}
+                    style={{ width: `${Math.min((latestData.timeToFailure / 200) * 100, 100)}%` }}
                   />
                 </div>
                 <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  {latestData.timeToFailure < 150
+                  {latestData.timeToFailure < 130
                     ? 'Critical - Immediate attention required'
                     : latestData.timeToFailure < 170
                     ? 'Warning - Schedule maintenance soon'
@@ -133,7 +133,7 @@ const SpindleParameters: React.FC<SpindleParametersProps> = memo(({ data, machin
             </>
           ) : (
             <div className="text-gray-500 dark:text-gray-400 text-sm">
-              Time to failure will be calculated when load exceeds 140%
+              Time to failure will be calculated when load exceeds 168%
             </div>
           )}
         </div>

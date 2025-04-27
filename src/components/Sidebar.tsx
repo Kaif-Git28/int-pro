@@ -1,12 +1,12 @@
 import React, { memo } from 'react';
-import { Home, HardDrive, BarChart2, AlertTriangle, Download, Settings, Wifi, Zap, Cloud } from 'lucide-react';
+import { Home, HardDrive, BarChart2, Download, Settings, Wifi, Zap, Cloud } from 'lucide-react';
 import { SidebarProps } from '../types';
 import { systemHealthData } from '../data/mockData';
 
-const Sidebar: React.FC<SidebarProps> = memo(({ activeTab, setActiveTab, alerts }) => (
+const Sidebar: React.FC<SidebarProps> = memo(({ activeTab, setActiveTab }) => (
   <div className="p-4">
     <nav className="space-y-1">
-      {['dashboard', 'machines', 'analytics', 'alerts', 'reports', 'settings'].map((tab) => (
+      {['dashboard', 'machines', 'analytics', 'reports', 'settings'].map((tab) => (
         <button
           key={tab}
           onClick={() => setActiveTab(tab)}
@@ -19,7 +19,6 @@ const Sidebar: React.FC<SidebarProps> = memo(({ activeTab, setActiveTab, alerts 
           {tab === 'dashboard' && <Home size={16} />}
           {tab === 'machines' && <HardDrive size={16} />}
           {tab === 'analytics' && <BarChart2 size={16} />}
-          {tab === 'alerts' && <AlertTriangle size={16} />}
           {tab === 'reports' && <Download size={16} />}
           {tab === 'settings' && <Settings size={16} />}
           <span>{tab.charAt(0).toUpperCase() + tab.slice(1)}</span>

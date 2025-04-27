@@ -1,41 +1,56 @@
 import React, { memo } from 'react';
-import { HardDrive } from 'lucide-react';
+import { HardDrive, Clock, RotateCcw, Calendar } from 'lucide-react';
 import { MachineStatusProps } from '../types';
 import { useDashboard } from '../context/DashboardContext';
 
 const MachineStatus: React.FC<MachineStatusProps> = memo(({ onSelectMachine }) => {
-  const { machineList, setSelectedMachine } = useDashboard();
-
-  // Helper function to determine machine status based on data
-  const getMachineStatus = (machineId: string) => {
-    // In a real application, you would determine this based on actual data
-    // For now, we'll randomize for demonstration
-    const statuses = ['Running', 'Idle', 'Warning', 'Maintenance'];
-    const randomIndex = Math.floor(machineId.charCodeAt(machineId.length - 1) % 4);
-    return statuses[randomIndex] as 'Running' | 'Idle' | 'Warning' | 'Maintenance';
-  };
-
-  // Helper function to generate health percentage
-  const getMachineHealth = (machineId: string) => {
-    // Hash the machine ID to get a consistent random value
-    const hash = machineId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    return 50 + (hash % 50); // Value between 50% and 99%
-  };
-
-  // Helper function to generate last maintenance date
-  const getLastMaintenance = (machineId: string) => {
-    const hash = machineId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    const daysAgo = hash % 60; // Between 0 and 59 days ago
-    const date = new Date();
-    date.setDate(date.getDate() - daysAgo);
-    return date.toLocaleDateString();
-  };
+  const { machineList, setSelectedMachine, dashboardData, resetMachineFailure } = useDashboard();
 
   const handleMachineClick = (machineId: string) => {
     if (onSelectMachine) {
       onSelectMachine(machineId);
     } else {
       setSelectedMachine(machineId);
+    }
+  };
+
+  // Get failure time for a machine from the persistent storage
+  const getTimeToFailure = (machineId: string) => {
+    // First check the persistent storage
+    if (dashboardData.machineFailureStatus[machineId]) {
+      return dashboardData.machineFailureStatus[machineId];
+    }
+    
+    // Fallback to current data if not in persistent storage
+    const machineData = dashboardData.historicalData.find(data => data.machineId === machineId);
+    return machineData ? machineData.timeToFailure : 0;
+  };
+  
+  // Check if a machine was reset recently
+  const getMachineResetInfo = (machineId: string) => {
+    return dashboardData.resetMachines[machineId] || null;
+  };
+  
+  // Get days since last reset
+  const getDaysSinceReset = (resetTime: string) => {
+    const resetDate = new Date(resetTime);
+    const currentDate = new Date();
+    const diffTime = Math.abs(currentDate.getTime() - resetDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+  
+  // Reset failure prediction after maintenance is complete
+  const handleResetFailurePrediction = (e: React.MouseEvent, machineId: string) => {
+    e.stopPropagation(); // Prevent row click
+    
+    // Simple confirmation
+    if (window.confirm(`Reset failure prediction for ${machineId}? This indicates maintenance has been completed.`)) {
+      // Call the reset function from context
+      resetMachineFailure(machineId);
+      
+      // Show confirmation message
+      alert(`Maintenance completed for ${machineId}. Failure prediction reset.`);
     }
   };
 
@@ -50,17 +65,20 @@ const MachineStatus: React.FC<MachineStatusProps> = memo(({ onSelectMachine }) =
                 Machine
               </th>
               <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                Time to Failure
+              </th>
+              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Status
               </th>
               <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                Health
+                Actions
               </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
             {machineList.map((machineId) => {
-              const status = getMachineStatus(machineId);
-              const health = getMachineHealth(machineId);
+              const timeToFailure = getTimeToFailure(machineId);
+              const resetInfo = getMachineResetInfo(machineId);
               
               return (
                 <tr 
@@ -78,38 +96,81 @@ const MachineStatus: React.FC<MachineStatusProps> = memo(({ onSelectMachine }) =
                     </div>
                   </td>
                   <td className="px-3 py-2 whitespace-nowrap">
-                    <span
-                      className={`px-2 py-1 text-xs rounded-full ${
-                        status === 'Running'
-                          ? 'bg-emerald-500 bg-opacity-20 text-emerald-500'
-                          : status === 'Idle'
-                          ? 'bg-blue-500 bg-opacity-20 text-blue-500'
-                          : status === 'Warning'
-                          ? 'bg-yellow-500 bg-opacity-20 text-yellow-500'
-                          : 'bg-gray-500 bg-opacity-20 text-gray-500'
-                      }`}
-                    >
-                      {status}
-                    </span>
+                    {timeToFailure > 0 ? (
+                      <div className="flex items-center space-x-2">
+                        <Clock size={16} className="text-purple-500" />
+                        <div>
+                          <span className="text-sm font-medium text-gray-900 dark:text-white">
+                            {Math.round(timeToFailure)} days
+                          </span>
+                          <div className="w-32 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden mt-1">
+                            <div
+                              className={`h-full ${
+                                timeToFailure < 130
+                                  ? 'bg-red-500'
+                                  : timeToFailure < 170
+                                  ? 'bg-yellow-500'
+                                  : 'bg-green-500'
+                              }`}
+                              style={{ width: `${Math.min((timeToFailure / 200) * 100, 100)}%` }}
+                            />
+                          </div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            {timeToFailure < 130
+                              ? 'Critical - Schedule maintenance'
+                              : timeToFailure < 170
+                              ? 'Warning - Monitor closely'
+                              : 'Normal operation'}
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                        Not calculated
+                      </span>
+                    )}
                   </td>
                   <td className="px-3 py-2 whitespace-nowrap">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-20 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                        <div
-                          className={`h-full ${
-                            health >= 90
-                              ? 'bg-emerald-500'
-                              : health >= 75
-                              ? 'bg-blue-500'
-                              : health >= 60
-                              ? 'bg-yellow-500'
-                              : 'bg-red-500'
-                          }`}
-                          style={{ width: `${health}%` }}
-                        />
+                    {resetInfo ? (
+                      <div className="flex items-center space-x-1">
+                        <Calendar size={16} className="text-green-500" />
+                        <div>
+                          <span className="text-xs text-green-500 font-medium">
+                            Maintenance completed {getDaysSinceReset(resetInfo.resetTime)} days ago
+                          </span>
+                        </div>
                       </div>
-                      <span className="text-sm text-gray-900 dark:text-white">{health}%</span>
-                    </div>
+                    ) : timeToFailure > 0 ? (
+                      <span className={`text-xs px-2 py-1 rounded-full ${
+                        timeToFailure < 130
+                          ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:bg-opacity-30 dark:text-red-400'
+                          : timeToFailure < 170
+                          ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:bg-opacity-30 dark:text-yellow-400'
+                          : 'bg-green-100 text-green-800 dark:bg-green-900 dark:bg-opacity-30 dark:text-green-400'
+                      }`}>
+                        {timeToFailure < 130
+                          ? 'Maintenance Required'
+                          : timeToFailure < 170
+                          ? 'Monitoring Required'
+                          : 'Normal Operation'}
+                      </span>
+                    ) : (
+                      <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                        Normal
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    {timeToFailure > 0 && (
+                      <button
+                        onClick={(e) => handleResetFailurePrediction(e, machineId)}
+                        className="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 flex items-center"
+                        title="Reset after maintenance completed"
+                      >
+                        <RotateCcw size={16} className="mr-1" />
+                        <span className="text-xs">Reset</span>
+                      </button>
+                    )}
                   </td>
                 </tr>
               );

@@ -17,20 +17,18 @@ export interface ApiSpindleData {
   };
 }
 
+// Machine reset information
+export interface MachineResetInfo {
+  resetTime: string; // ISO timestamp of when the reset occurred
+  expiresAfterDays: number; // Reset expires after this many days
+}
+
 export interface Machine {
   id: string;
   name: string;
   status: 'Running' | 'Idle' | 'Warning' | 'Maintenance';
   lastMaintenance: string;
   health: number;
-}
-
-export interface Alert {
-  id: number;
-  type: string;
-  time: string;
-  machine: string;
-  severity: 'warning' | 'critical';
 }
 
 export interface SystemHealth {
@@ -53,7 +51,6 @@ export interface EnergyConsumptionData {
 export interface SidebarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
-  alerts: Alert[];
 }
 
 export interface KPICardProps {
@@ -72,28 +69,24 @@ export interface OEEChartProps {
   oeeValue: number;
 }
 
-export interface AlertsProps {
-  alerts: Alert[];
-}
-
 export interface MachineStatusProps {
   onSelectMachine?: (machineId: string) => void;
 }
 
 export interface ReportsProps {
-  alerts: Alert[];
   machines: string[];
 }
 
 export interface MachineAlertsProps {
-  alerts: Alert[];
   machineId: string;
 }
 
 // Dashboard state type
 export interface DashboardState {
   historicalData: MachineData[];
-  alerts: Alert[];
   oeeValue: number;
   uptime: number;
+  machineFailureStatus: Record<string, number>; // Store failure days for each machine
+  resetMachines: Record<string, MachineResetInfo>; // Track machines that have been reset with their reset time
+  lastUpdateTime: string; // Track when the data was last updated for time-based calculations
 } 
